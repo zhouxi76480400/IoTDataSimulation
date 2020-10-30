@@ -1,6 +1,8 @@
 from io_tools import DataSetTool
 from io_tools import CSVTool
 from data_tools import DataProcessTool
+from data_tools import XYToMatrixTool
+from data_tools import RawDataToDayDataTool
 import os
 
 data_set_directory_name = "data_set"
@@ -31,6 +33,9 @@ def main():
         # we can continue
         start_timestamp = global_timestamp_min
         print("Set the first day's 0:00 to timestamp:" + str(start_timestamp))
+        # convert raw data to day data
+        RawDataToDayDataTool.raw_data_to_day_data(user_data_list[0], 1, start_timestamp)
+
 
 
     else:
