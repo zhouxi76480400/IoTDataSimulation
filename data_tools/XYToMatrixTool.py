@@ -30,7 +30,7 @@
 #   Like this.
 #  Then we should calculate the position
 def x_y_to_matrix(matrix_with_and_height: int = 10, point_x: float = 0., point_y: float = 0.):
-    print("point x and y to position calculate")
+    # print("point x and y to position calculate")
     return_value = 0.
     if (0 <= point_x <= 1) and (0 <= point_y <= 1):
         # x_offset
@@ -50,5 +50,5 @@ def x_y_to_matrix(matrix_with_and_height: int = 10, point_x: float = 0., point_y
         if y_offset > (matrix_with_and_height - 1) * matrix_with_and_height:
             y_offset = (matrix_with_and_height - 1) * matrix_with_and_height
         return_value = x_offset + y_offset
-    print("point x=" + str(point_x) + ", y=" + str(point_y) + ", position=" + str(return_value))
+    # print("point x=" + str(point_x) + ", y=" + str(point_y) + ", position=" + str(return_value))
     return return_value
