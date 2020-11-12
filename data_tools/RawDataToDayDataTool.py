@@ -7,7 +7,8 @@ one_hour_seconds = 60 * 60
 one_day_hours = 24
 
 
-def raw_data_to_day_data(a_user_s_raw_data_list: list, day_count: int, start_timestamp: int):
+def raw_data_to_day_data(a_user_s_raw_data_list: list, day_count: int, start_timestamp: int, is_convert_by_grid=False,
+                         x_y_list_to_flat=True):
     if a_user_s_raw_data_list is not None:
         # create new data list
         list_main = []
@@ -62,8 +63,12 @@ def raw_data_to_day_data(a_user_s_raw_data_list: list, day_count: int, start_tim
 
             # convert position to number
             number = 0
+            x_y = [0, 0]
             if is_found:
-                number = XYToMatrixTool.x_y_to_matrix(point_x=x_position, point_y=y_position)
+                if is_convert_by_grid:
+                    number = XYToMatrixTool.x_y_to_matrix(point_x=x_position, point_y=y_position)
+                else:
+                    x_y = [x_position, y_position]
             else:
                 if now_hour_not_include_days > 0:
                     list_pos = now_day
@@ -71,12 +76,32 @@ def raw_data_to_day_data(a_user_s_raw_data_list: list, day_count: int, start_tim
                     if now_hour == 0:
                         list_pos -= 1
                         data_pos = one_day_hours - 1
-                    last_number = list_main[list_pos][data_pos]
-                    if last_number > 0:
-                        number = last_number
+                    if is_convert_by_grid:
+                        last_number = list_main[list_pos][data_pos]
+                        if last_number > 0:
+                            number = last_number
+                    else:
+                        last_x_y = list_main[list_pos][data_pos]
+                        if last_x_y[0] > 0 or last_x_y[1] > 0:
+                            x_y = last_x_y
             # print("Get position:" + str(number))
 
             # add in to list
-            list_main[now_day].append(number)
+            if is_convert_by_grid:
+                list_main[now_day].append(number)
+            else:
+                list_main[now_day].append(x_y)
+        if not is_convert_by_grid and x_y_list_to_flat:
+            for i in range(day_count):
+                a_day = list_main[i]
+                a_day_new = []
+                for x_y_list in a_day:
+                    x_ = x_y_list[0]
+                    y_ = x_y_list[1]
+                    a_day_new.append(x_)
+                    a_day_new.append(y_)
+            #         x_y_list.clear()
+            #     a_day.clear()
+                list_main[i] = a_day_new
         return list_main
     return []

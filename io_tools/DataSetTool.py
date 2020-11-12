@@ -78,3 +78,33 @@ def read_data_set(path=''):
         return_user_id_list = user_id_list
         return_user_data_list = user_data_list
     return return_user_id_list, return_user_data_list
+
+
+def get_all_users_have_mobile_devices_type():
+    file_path = os.path.join(os.path.join(os.path.split(get_file_path(__file__))[0], "data_set"),
+                             "objects_description.csv")
+    devices_data = []
+    f_ = open(file_path, "r")
+    csv = f_.read()
+    f_.close()
+    lines = csv.split("\n")
+    if lines[len(lines) - 1] == '':
+        lines.pop(len(lines) - 1)
+    lines.pop(0)
+    for line in lines:
+        values = line.split(",")
+        id_user = int(values[1])
+        device_type = int(values[2])
+        devices_data.append([id_user, device_type])
+
+    all_users_devices_list = [] #
+
+    for i in range(0, 4000):
+        set_ = [False, False, False, False, False]
+        for device in devices_data:
+            if device[0] == i+1:
+                device_type = device[1]
+                if device_type <= len(set_):
+                    set_[device_type - 1] = True
+        all_users_devices_list.append(set_)
+    return all_users_devices_list

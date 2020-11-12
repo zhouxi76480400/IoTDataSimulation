@@ -17,6 +17,7 @@ simulation_time_day = 10  # days
 
 start_timestamp = 0  #
 
+is_euclidean=True
 
 def main():
     # Read dataset to python object
@@ -34,14 +35,15 @@ def main():
         start_timestamp = global_timestamp_min
         print("Set the first day's 0:00 to timestamp:" + str(start_timestamp))
         #
-        # problem 1: convert matrix to 10 x (400 x 24)
+        # problem 1: convert matrix to 10 x (4000 x 24)
         print("\nCalculating problem 1 ...")
         fin_list = []
         for i in range(simulation_time_day):
             fin_list.append([])
         for a_user_s_data in user_data_list:
             # convert raw data to day data
-            a_result = RawDataToDayDataTool.raw_data_to_day_data(a_user_s_data, simulation_time_day, start_timestamp)
+            a_result = RawDataToDayDataTool.raw_data_to_day_data(a_user_s_data, simulation_time_day, start_timestamp,
+                                                                 is_convert_by_grid=False, x_y_list_to_flat=False)
             for i in range(simulation_time_day):
                 day_result = a_result[i]
                 fin_list[i].append(day_result)
@@ -53,22 +55,53 @@ def main():
 
         print("\tFinished! \n")
 
+
+        if is_euclidean:
+            print("\nUse Euclidean distance")
+
+            print("\n" + str(DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[0], fin_list[0],
+                                                                              is_euclidean=is_euclidean)))
+
+        all_distance_list = []
         # problem 2.1 (Md and M(d-1))
         print("\nCalculating problem 2.1 ...")
         for i in range(simulation_time_day):
-            if i > 0:
+            # if i > 0: # do not use the data of day1 and day 2
+            if i > 2:
                 print("\tCalculating similarity between M" + str(i + 1) + " and M" + str(i) + " ...")
-                similarity = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 1])
+                similarity, distance_list = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 1],
+                                                                              is_euclidean=is_euclidean)
+                all_distance_list.append(distance_list)
                 print("\t\t Result:" + str(similarity))
 
         print("\tFinished! \n")
+
+
+        print("\tSave all xy data to file")
+
+        CSVTool.save_to_file_all_x_y_data("day_x_y_matrix", fin_list)
+
+
+        print("\tSave all md and md-1 to file")
+        save_to_file_distance = []
+        for i in range(len(all_distance_list[0])):
+            a_user_s_distance_data = []
+            for j in range(len(all_distance_list)):
+                this_distance_value = all_distance_list[j][i]
+                a_user_s_distance_data.append(this_distance_value)
+            save_to_file_distance.append(a_user_s_distance_data)
+
+        CSVTool.save_matrix_to_csv("matrix_distance", save_to_file_distance)
+
+
 
         # problem 2.2 (Md and M(d-2))
         print("\nCalculating problem 2.2 ...")
         for i in range(simulation_time_day):
             if i > 1:
                 print("\tCalculating similarity between M" + str(i + 1) + " and M" + str(i - 1) + " ...")
-                similarity = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 2])
+                similarity, _ = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 2],
+                                                                              is_euclidean=is_euclidean)
                 print("\t\t Result:" + str(similarity))
 
         print("\tFinished! \n")
@@ -78,7 +111,8 @@ def main():
         for i in range(simulation_time_day):
             if i > 2:
                 print("\tCalculating similarity between M" + str(i + 1) + " and M" + str(i - 2) + " ...")
-                similarity = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 3])
+                similarity, _ = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 3],
+                                                                              is_euclidean=is_euclidean)
                 print("\t\t Result:" + str(similarity))
 
         print("\tFinished! \n")
@@ -88,8 +122,9 @@ def main():
         for i in range(simulation_time_day):
             if i > 0:
                 print("\tCalculating similarity between M" + str(i + 1) + " and M" + str(i) + " (random) ...")
-                similarity = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 1],
-                                                                              is_random=True)
+                similarity, _ = DataProcessTool.similarity_matrix_a_and_matrix_b(fin_list[i], fin_list[i - 1],
+                                                                              is_random=True,
+                                                                              is_euclidean=is_euclidean)
                 print("\t\t Result:" + str(similarity))
 
         print("\tFinished! \n")

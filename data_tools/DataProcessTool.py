@@ -22,20 +22,34 @@ def get_global_timestamp_min_and_timestamp_max(user_data_list: list):
     return global_timestamp_min, global_timestamp_max
 
 
-def similarity_row_a_and_row_b(row_a: list, row_b: list):
+def similarity_row_a_and_row_b(row_a: list, row_b: list, is_euclidean=False):
+    return_data = 0
     sum_ = 0
     if len(row_a) == len(row_b):
         i = 0
         for element_from_a in row_a:
             element_from_b = row_b[i]
-            sum_ += (element_from_a * element_from_b)
+            if is_euclidean:
+                x1 = element_from_a[0]
+                x2 = element_from_b[0]
+                y1 = element_from_a[1]
+                y2 = element_from_b[1]
+                euclidean_distance_xy1_xy2 = math.sqrt(math.pow((x1-x2), 2) + math.pow((y1-y2), 2))
+                sum_ += euclidean_distance_xy1_xy2
+            else:
+                sum_ += (element_from_a * element_from_b)
             i += 1
-    cos_ = math.cos(sum_)
-    return cos_
+    if not is_euclidean:
+        return_data = math.cos(sum_)
+    else:
+        return_data = sum_ / len(row_a)
+    return return_data
 
 
-def similarity_matrix_a_and_matrix_b(matrix_a: list, matrix_b: list, is_random=False):
+#  will return average and []
+def similarity_matrix_a_and_matrix_b(matrix_a: list, matrix_b: list, is_random=False, is_euclidean=False):
     return_num = 0
+    distance_count = []
     list_size_a = len(matrix_a)
     list_size_b = len(matrix_b)
 
@@ -52,9 +66,14 @@ def similarity_matrix_a_and_matrix_b(matrix_a: list, matrix_b: list, is_random=F
             else:
                 list_b = matrix_b[i]
 
-            cos_a_and_b = similarity_row_a_and_row_b(list_a, list_b)
+            cos_a_and_b = similarity_row_a_and_row_b(list_a, list_b, is_euclidean=is_euclidean)
+            distance_count.append(cos_a_and_b)
             cos_sum += cos_a_and_b
 
         similarity = cos_sum / list_size_a
         return_num = similarity
-    return return_num
+    return return_num, distance_count
+
+
+def classification_all_users_from_result_matrix(mat: list):
+    print(mat)
