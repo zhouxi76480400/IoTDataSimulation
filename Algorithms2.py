@@ -567,6 +567,64 @@ def get_interested_device_type():
     return device_type
 
 
+def set_max(list_max_or_min, now_type, now_value):
+    distance_max_2 = list_max_or_min[now_type - 1]
+    if distance_max_2 == 0:
+        distance_max_2 = now_value
+    else:
+        if distance_max_2 < now_value:
+            distance_max_2 = now_value
+    list_max_or_min[now_type - 1] = distance_max_2
+
+
+def set_min(list_max_or_min, now_type, now_value):
+    distance_max_2 = list_max_or_min[now_type - 1]
+    if distance_max_2 == 0:
+        distance_max_2 = now_value
+    else:
+        if distance_max_2 > now_value:
+            distance_max_2 = now_value
+    list_max_or_min[now_type - 1] = distance_max_2
+
+
+def set_avg(list_distance_count, list_device_type_count, distance_avg):
+    for now_a in range(len(list_distance_count)):
+        count_a = list_distance_count[now_a]
+        value_a = list_device_type_count[now_a]
+        if value_a != 0:
+            avg_a = count_a / value_a
+        else:
+            avg_a = 0
+        distance_avg[now_a] = avg_a
+
+
+def sum_add(list_local, list_global):
+    for i_ in range(len(list_local)):
+        list_global[i_] += list_local[i_]
+
+
+def set_max_to_global(list_local, list_global):
+    for i_ in range(len(list_global)):
+        val_local = list_local[i_]
+        list_list_global: list = list_global[i_]
+        list_list_global.append(val_local)
+
+
+def get_all_max_global(list_global):
+    list_ret = []
+    for a_list in list_global:
+        list_ret.append(max(a_list))
+    return list_ret
+
+
+def get_all_min_global(list_global):
+    list_ret = []
+    for a_list in list_global:
+        list_ret.append(min(a_list))
+    return list_ret
+
+
+
 def get_chart_1_data(day, hour_):
     #
     x_axis = []
@@ -577,8 +635,27 @@ def get_chart_1_data(day, hour_):
     y_axis_distance_avg_1 = []
     y_axis_distance_avg_2 = []
 
+    all_device_type_count = [0, 0, 0, 0, 0]
+
+    y_axis_device_type_and_traffic_max_1 = [[], [], [], [], []]
+    # y_axis_device_type_and_traffic_avg_1 = [0, 0, 0, 0, 0]
+    y_axis_device_type_and_traffic_min_1 = [[], [], [], [], []]
+
+    y_axis_device_type_and_traffic_max_2 = [[], [], [], [], []]
+    # y_axis_device_type_and_traffic_avg_2 = [0, 0, 0, 0, 0]
+    y_axis_device_type_and_traffic_min_2 = [[], [], [], [], []]
+
+    y_axis_device_type_and_distance_max_1 = [[], [], [], [], []]
+    # y_axis_device_type_and_traffic_avg_1 = [0, 0, 0, 0, 0]
+    y_axis_device_type_and_distance_min_1 = [[], [], [], [], []]
+
+    y_axis_device_type_and_distance_max_2 = [[], [], [], [], []]
+    # y_axis_device_type_and_traffic_avg_2 = [0, 0, 0, 0, 0]
+    y_axis_device_type_and_distance_min_2 = [[], [], [], [], []]
+
+
     start_user_count = 100
-    max_user_count = 4000
+    max_user_count = 103
 
     for i in range(start_user_count, max_user_count):
         print("time:" + str(i))
@@ -592,8 +669,26 @@ def get_chart_1_data(day, hour_):
         a_time_traffics_by_2 = []
         a_time_distance_by_2 = []
 
+        a_time_device_type_count = [0, 0, 0, 0, 0]
+
+        a_time_device_distance_max_1 = [0, 0, 0, 0, 0]
+        a_time_device_distance_count_1 = [0, 0, 0, 0, 0]
+        a_time_device_distance_min_1 = [0, 0, 0, 0, 0]
+
+        a_time_device_distance_max_2 = [0, 0, 0, 0, 0]
+        a_time_device_distance_count_2 = [0, 0, 0, 0, 0]
+        a_time_device_distance_min_2 = [0, 0, 0, 0, 0]
+
+        a_time_device_traffic_max_1 = [0, 0, 0, 0, 0]
+        a_time_device_traffic_max_2 = [0, 0, 0, 0, 0]
+        a_time_device_traffic_min_1 = [0, 0, 0, 0, 0]
+        a_time_device_traffic_min_2 = [0, 0, 0, 0, 0]
+
         for a_test_user in all_test_user:
             interested_device = get_interested_device_type()
+            # type_count +1
+            a_time_device_type_count[interested_device - 1] += 1
+            # print(a_time_device_type_count)
             # use_a1
             traffic_1, range_1 = a1(day, hour_, str(a_test_user), interested_device)
             # use_d2
@@ -604,6 +699,58 @@ def get_chart_1_data(day, hour_):
             #
             a_time_distance_by_1.append(range_1)
             a_time_distance_by_2.append(range_2)
+            # 加上距離
+            a_time_device_distance_count_1[interested_device - 1] += range_1
+            a_time_device_distance_count_2[interested_device - 1] += range_2
+
+            # set max 2
+            set_max(a_time_device_distance_max_1, interested_device, range_1)
+            set_max(a_time_device_distance_max_2, interested_device, range_2)
+            set_min(a_time_device_distance_min_1, interested_device, range_1)
+            set_min(a_time_device_distance_min_2, interested_device, range_2)
+
+            # set max 1
+            set_max(a_time_device_traffic_max_1, interested_device, traffic_1)
+            set_max(a_time_device_traffic_max_2, interested_device, traffic_2)
+            set_min(a_time_device_traffic_min_1, interested_device, traffic_1)
+            set_min(a_time_device_traffic_min_2, interested_device, traffic_2)
+
+
+        # calc avg
+        a_time_device_distance_avg_1 = [0, 0, 0, 0, 0]
+        set_avg(a_time_device_distance_count_1, a_time_device_type_count, a_time_device_distance_avg_1)
+
+        a_time_device_distance_avg_2 = [0, 0, 0, 0, 0]
+        set_avg(a_time_device_distance_count_2, a_time_device_type_count, a_time_device_distance_avg_2)
+
+        sum_add(a_time_device_type_count, all_device_type_count)
+        # add into global avg max min
+        set_max_to_global(a_time_device_distance_max_1, y_axis_device_type_and_distance_max_1)
+        set_max_to_global(a_time_device_distance_max_2, y_axis_device_type_and_distance_max_2)
+        set_max_to_global(a_time_device_distance_min_1, y_axis_device_type_and_distance_min_1)
+        set_max_to_global(a_time_device_distance_min_2, y_axis_device_type_and_distance_min_2)
+
+        set_max_to_global(a_time_device_traffic_max_1, y_axis_device_type_and_traffic_max_1)
+        set_max_to_global(a_time_device_traffic_max_2, y_axis_device_type_and_traffic_max_2)
+        set_max_to_global(a_time_device_traffic_min_1, y_axis_device_type_and_traffic_min_1)
+        set_max_to_global(a_time_device_traffic_min_2, y_axis_device_type_and_traffic_min_2)
+
+
+        # print(a_time_device_traffic_max_1)
+        # print(a_time_device_traffic_max_2)
+        # print(a_time_device_traffic_min_1)
+        # print(a_time_device_traffic_min_2)
+
+        # print(a_time_device_distance_max_1)
+        # print(a_time_device_distance_avg_1)
+        # print(a_time_device_distance_min_1)
+        # print("_____")
+        # print(a_time_device_distance_max_2)
+        # print(a_time_device_distance_avg_2)
+        # print(a_time_device_distance_min_2)
+        # print("_____1")
+
+
 
         #
         a_time_traffics_avg_by_1 = sum(a_time_traffics_by_1) / all_test_user_count
@@ -617,7 +764,26 @@ def get_chart_1_data(day, hour_):
         y_axis_distance_avg_2.append(a_time_distance_avg_by_2)
 
 
+    #)
+    y_axis_device_type_and_distance_max_1 = get_all_max_global(y_axis_device_type_and_distance_max_1)
+    y_axis_device_type_and_distance_max_2 = get_all_max_global(y_axis_device_type_and_distance_max_2)
+    y_axis_device_type_and_distance_min_1 = get_all_min_global(y_axis_device_type_and_distance_min_1)
+    y_axis_device_type_and_distance_min_2 = get_all_min_global(y_axis_device_type_and_distance_min_2)
 
+    y_axis_device_type_and_traffic_max_1 = get_all_max_global(y_axis_device_type_and_traffic_max_1)
+    y_axis_device_type_and_traffic_max_2 = get_all_max_global(y_axis_device_type_and_traffic_max_2)
+    y_axis_device_type_and_traffic_min_1 = get_all_min_global(y_axis_device_type_and_traffic_min_1)
+    y_axis_device_type_and_traffic_min_2 = get_all_min_global(y_axis_device_type_and_traffic_min_2)
+
+
+
+
+    # print("aaaaaaaaaaaaaa")
+    # print(all_device_type_count)
+    # print(y_axis_device_type_and_traffic_max_1)
+    # print(y_axis_device_type_and_traffic_max_2)
+    # print(y_axis_device_type_and_traffic_min_1)
+    # print(y_axis_device_type_and_traffic_min_2)
 
     # print(x_axis)
     save_list_to_csv(x_axis, os.path.join(chart_data_save_path, "chart_1_5_x.csv"))
@@ -629,6 +795,16 @@ def get_chart_1_data(day, hour_):
     save_list_to_csv(y_axis_distance_avg_1, os.path.join(chart_data_save_path, "chart_5_y1.csv"))
     # print(y_axis_distance_avg_2)
     save_list_to_csv(y_axis_distance_avg_2, os.path.join(chart_data_save_path, "chart_5_y2.csv"))
+
+    save_list_to_csv(y_axis_device_type_and_distance_max_1, os.path.join(chart_data_save_path, "chart_6_y1_max.csv"))
+    save_list_to_csv(y_axis_device_type_and_distance_max_2, os.path.join(chart_data_save_path, "chart_6_y2_max.csv"))
+    save_list_to_csv(y_axis_device_type_and_distance_min_1, os.path.join(chart_data_save_path, "chart_6_y1_min.csv"))
+    save_list_to_csv(y_axis_device_type_and_distance_min_2, os.path.join(chart_data_save_path, "chart_6_y2_min.csv"))
+
+    save_list_to_csv(y_axis_device_type_and_traffic_max_1, os.path.join(chart_data_save_path, "chart_2_y1_max.csv"))
+    save_list_to_csv(y_axis_device_type_and_traffic_max_2, os.path.join(chart_data_save_path, "chart_2_y2_max.csv"))
+    save_list_to_csv(y_axis_device_type_and_traffic_min_1, os.path.join(chart_data_save_path, "chart_2_y1_min.csv"))
+    save_list_to_csv(y_axis_device_type_and_traffic_min_2, os.path.join(chart_data_save_path, "chart_2_y2_min.csv"))
 
 
 if __name__ == '__main__':
