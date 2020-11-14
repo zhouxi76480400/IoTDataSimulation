@@ -1,10 +1,21 @@
-import numpy as np
-
-vec1 = np.array([0,1,2,3])
-vec2 = np.array([0,1,2,3])
 
 
 
-result = np.sqrt(sum(pow(vec1-vec2,2)))
+all1 = 1688942 + 1619307 + 1680215 + 655456 + 1572875
+all2 = 7348032 + 7045050 + 7308059 + 7200863 + 6845475
 
-print(result)
+print(all1)
+
+print(all2)
+
+
+
+
+import random
+
+
+r = random.randint(0, 3999)
+
+random.random()
+
+print(random.random())

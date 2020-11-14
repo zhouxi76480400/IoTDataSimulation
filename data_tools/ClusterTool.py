@@ -4,12 +4,12 @@
 # day 1,2,... hour 0,1,...,23
 def find_user_in_which_cluster(mat, day: int, hour_: int, user: int):
     return_value = -1
-    if day + 1 <= len(mat) and hour_ + 1 <= len(mat[0]):
+    if day <= len(mat) and hour_ + 1 <= len(mat[0]):
         matrix_this_time = mat[day - 1][hour_]
         cluster = 0
         for now_ in range(len(matrix_this_time)):
             matrix_x_s = matrix_this_time[now_]
-            if matrix_x_s[user - 1] is True:
+            if matrix_x_s[user] is True:
                 cluster = now_
         return_value = cluster
     return return_value
@@ -18,19 +18,19 @@ def find_user_in_which_cluster(mat, day: int, hour_: int, user: int):
 def find_all_users_in_this_cluster(mat, all_user_devices_type_list,
                                    day: int, hour_: int, cluster_position: int, device_type=-1):
     return_value = []
-    if day + 1 <= len(mat) and hour_ + 1 <= len(mat[0]):
+    if day <= len(mat) and hour_ + 1 <= len(mat[0]):
         matrix_this_time = mat[day - 1][hour_]
         user_is_in_this_cluster_list = matrix_this_time[cluster_position]
         for pos_ in range(len(user_is_in_this_cluster_list)):
             is_in = user_is_in_this_cluster_list[pos_]
             if is_in:
-                return_value.append(pos_ + 1)
+                return_value.append(pos_)
 
     #
     new_list_to_return = []
     if device_type != -1:
         for a_id_user in return_value:
-            has = all_user_devices_type_list[a_id_user - 1][device_type - 1]
+            has = all_user_devices_type_list[a_id_user][device_type - 1]
             if has:
                 new_list_to_return.append(a_id_user)
         return new_list_to_return
@@ -63,7 +63,7 @@ def get_neighbor_clusters(output_x_size: int, output_y_size: int, now_cluster_po
             no_right = True
         if tmp2 < 0:
             no_top = True
-        if tmp2 > output_y_size - 2:
+        if tmp2 > output_y_size - 1:
             no_bottom = True
         if not no_left and not no_top and not no_right and no_bottom:
             #  0001

@@ -4,8 +4,12 @@ import os
 from io_tools import CSVTool
 from io_tools import DataSetTool
 from data_tools import ClusterTool
+import math
+import random
 
 workspace_path = os.path.join(os.path.split(__file__)[0], "output")
+
+chart_data_save_path = os.path.join(workspace_path, "chart_data")
 
 data_set_folders = ["data_from_day_3", "data_from_day_4"]
 
@@ -48,62 +52,446 @@ def is_this_user_in_this_cluster(mat, day: int, hour_: int, cluster_position: in
     return is_this_user_in_this_cluster_inner
 
 
+all_uses_xy_dict = {}
+
+
+def read_all_user_s_x_y_list(day: int, hour_: int):
+    all_xy = []
+    file_path = os.path.join(os.path.join(os.path.join(workspace_path, data_set_folders[day - 1]), str(hour_)),
+                             str(hour_) + ".csv")
+
+    v_ = all_uses_xy_dict.get(file_path)
+    if v_ is not None:
+        all_xy = v_
+    else:
+        csv_x_y = ""
+        f = open(file_path, "r")
+        csv_x_y = f.read()
+        f.close()
+        lines = csv_x_y.split("\n")
+        if lines[len(lines) - 1] == "":
+            lines.pop(len(lines) - 1)
+
+        for now_ in range(len(lines)):
+            list_xy = lines[now_].split(",")
+            all_xy.append((float(list_xy[0]), float(list_xy[1])))
+        all_uses_xy_dict[file_path] = all_xy
+
+    return all_xy
+
+
+def get_a_user_s_xy(day: int, hour_: int, user_a_name: str):
+    all_xy_list = read_all_user_s_x_y_list(day, hour_)
+    x, y = all_xy_list[int(user_a_name)]
+    return x, y
+
+
+def calculate_the_user_s_between(day: int, hour_: int, user_a_name: str, user_b_name: str):
+    # x
+    user_a_x, user_a_y = get_a_user_s_xy(day, hour_, user_a_name)
+    #
+    user_b_x, user_b_y = get_a_user_s_xy(day, hour_, user_b_name)
+    distance = \
+        math.sqrt(math.pow(user_b_x - user_a_x, 2) + math.pow(user_b_y - user_a_y, 2))
+    return distance
+
+
+def has_this_type_device(user_name: str, device_type: int):
+    has: bool = devices_type_list[int(user_name)][device_type - 1]
+    return has
+
+
+def find_close_users(day: int, hour_: int, my_user_name: str, range_: float, interest_device_type: int):
+    distance_list = []
+    for user_tmp in range(4000):
+        user_tmp_name = str(user_tmp)
+        between_ = calculate_the_user_s_between(day, hour_, my_user_name, user_tmp_name)
+        if between_ <= range_:
+            # check is not my self
+            if user_tmp_name != my_user_name:
+                # check is interest
+                if has_this_type_device(user_tmp_name, interest_device_type):
+                    distance_list.append((user_tmp_name, between_))
+    return distance_list
+
+
+def sort_get_distance(close_user):
+    return close_user[1]
+
+
+def algorithm2(day: int, hour_: int, my_user_name: str, interest_device_type: int, range_expand_each_time: float):
+    traffic_counter = 0
+    range_ = range_expand_each_time
+    max_try_times = int(1. / range_expand_each_time)
+    #
+    close_users = []
+    while len(close_users) < 1 and traffic_counter < max_try_times:
+        close_users = find_close_users(day, hour_, my_user_name, range_, interest_device_type)
+        traffic_counter += 1
+        range_ += range_expand_each_time
+    close_users = sorted(close_users, key=sort_get_distance)
+
+    # print("bbbb:" + str(close_users))
+
+    return traffic_counter, close_users[0][1]  # range_
+
+
+def check_cluster_check_left_time(found_list):
+    left_time = 0
+    for bool_i in found_list:
+        if not bool_i:
+            left_time += 1
+    return left_time
+
+
+def get_not_checked_clusters(found_list, neighbor_list):
+    not_checked_list = []
+    for neighbor in neighbor_list:
+        if not found_list[neighbor]:
+            not_checked_list.append(neighbor)
+    return not_checked_list
+
+
+def get_neighbor_clusters_not_search(now_cluster, cluster_found_list):
+    ret_ = []
+    neighbors = ClusterTool.get_neighbor_clusters(10, 10, now_cluster)
+    for neighbor in neighbors:
+        if not cluster_found_list[neighbor]:
+            ret_.append(neighbor)
+    return ret_
+
+
+def add_into_hit_list(hit_list, found_list):
+    for fff_ in found_list:
+        hit_list[fff_] = True
+
+
+def print_hit_list(hit_list):
+    lllla = []
+    i = 0
+    for wwwwW in hit_list:
+        if wwwwW:
+            lllla.append(i)
+        i += 1
+
+
+def get_all_neighbor_s_neighbor(hit_list, all_neighbor):
+    all_nb_nb = []
+    for nb in all_neighbor:
+        nb_nb = ClusterTool.get_neighbor_clusters(10, 10, nb)
+        for nb_nb_nb in nb_nb:
+            if not hit_list[nb_nb_nb]:
+                all_nb_nb.append(nb_nb_nb)
+    #
+    all_nb_nb = list(set(all_nb_nb))
+    return all_nb_nb
+
+
+def algorithm1_sub1(hit_list, neighbors):
+    add_into_hit_list(hit_list, neighbors)
+    return get_all_neighbor_s_neighbor(hit_list, neighbors)
+
+
+def algorithm1(day: int, hour_: int, my_user_name: str, interest_device_type: int):
+    traffic = 1
+    #
+    hit_list = []
+    for h_pos in range(100):
+        hit_list.append(False)
+
+    #
+    first_cluster = ClusterTool.find_user_in_which_cluster(all_values_list, day, hour_, int(my_user_name))
+    neighbors = [first_cluster]
+
+    hit_list[first_cluster] = True
+    #
+    neighbor_users = ClusterTool.find_all_users_in_this_cluster(all_values_list, devices_type_list, day, hour_,
+                                                                first_cluster, interest_device_type)
+    if len(neighbor_users) == 1:
+        if str(neighbor_users[0]) == my_user_name:
+            neighbor_users = []
+
+    if len(neighbor_users) == 0:
+        while check_cluster_check_left_time(hit_list) > 0 and not len(neighbor_users) > 0:
+            neighbors = algorithm1_sub1(hit_list, neighbors)
+            # print(neighbors)
+            for neighbor in neighbors:
+                neighbor_users = \
+                    ClusterTool. \
+                        find_all_users_in_this_cluster(all_values_list,
+                                                       devices_type_list,
+                                                       day, hour_, neighbor, interest_device_type)
+                traffic += 1
+                if len(neighbor_users) > 0:
+                    break
+    range_list = []
+    # print("aaaa:" + str(neighbor_users))
+    if len(neighbor_users) > 0:
+        for neighbor_user in neighbor_users:
+            if str(neighbor_user) != my_user_name:
+                range_list.append(calculate_the_user_s_between(day, hour_, str(my_user_name), str(neighbor_user))
+                              )
+        if len(range_list) == 0:
+            print("用0")
+            return traffic, 0
+        else:
+            return traffic, min(range_list)
+    return traffic, -1
+
+
+def save_list_to_csv(list_, save_file_path):
+    csv_a = ""
+    for ele in list_:
+        csv_a += str(ele) + "\n"
+    fi = open(save_file_path, "w")
+    fi.write(csv_a)
+    fi.close()
+    csv_a = None
+
+
+#################################################################################
+
+# x: no. user y: traffic, distance
+def test_the_number_of_users_and_traffic(day_: int, hour_: int):
+    user_count = 100
+    #
+    data_list_a_traffic = []
+    data_list_a_traffic_avg = []
+    data_list_a_range = []
+    data_list_a_range_avg = []
+    #
+    data_list_b_traffic = []
+    data_list_b_traffic_avg = []
+    data_list_b_range = []
+    data_list_b_range_avg = []
+
+    #
+    data_list_kind_of_devices_distance_a = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_distance_a_max = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_distance_a_min = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_distance_b = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_distance_b_max = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_distance_b_min = [0, 0, 0, 0, 0]
+    #
+    data_list_kind_of_devices_traffic_a = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_traffic_a_min = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_traffic_a_max = [0, 0, 0, 0, 0]
+
+    data_list_kind_of_devices_traffic_b = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_traffic_b_min = [0, 0, 0, 0, 0]
+    data_list_kind_of_devices_traffic_b_max = [0, 0, 0, 0, 0]
+
+    data_list_kind_of_devices = [0, 0, 0, 0, 0]
+
+    #
+    counter_a_traffic = 0
+    counter_b_traffic = 0
+
+    #
+    counter_a_range = 0
+    counter_b_range = 0
+
+    now_day = day_
+    now_time = hour_
+
+    # for users in range(user_count):
+    for users in range(user_count):
+        print("number of users:" + str(users))
+        my_user = str(random.randint(0, user_count - 1))
+        device_type = random.randint(1, 5)
+
+        #
+        kind_of_device_now = data_list_kind_of_devices[device_type-1]
+        kind_of_device_now += 1
+        data_list_kind_of_devices[device_type - 1] = kind_of_device_now
+
+        # algorithm1
+        traffic_counter1, range_1 = algorithm1(now_day, now_time, my_user, device_type)
+        # algorithm2
+        traffic_counter2, range_2 = algorithm2(now_day, now_time, my_user, device_type, 0.004)
+        #
+        counter_a_traffic += traffic_counter1
+        counter_b_traffic += traffic_counter2
+        #
+        avg_a_traffic = counter_a_traffic / (users + 1)
+        avg_b_traffic = counter_b_traffic / (users + 1)
+        #
+        counter_a_range += range_1
+        counter_b_range += range_2
+        avg_a_range = counter_a_range / (users + 1)
+        avg_b_range = counter_b_range / (users + 1)
+        #
+        data_list_a_traffic.append(counter_a_traffic)
+        data_list_a_traffic_avg.append(avg_a_traffic)
+        data_list_a_range.append(counter_a_range)
+        data_list_a_range_avg.append(avg_a_range)
+        #
+        data_list_b_traffic.append(counter_b_traffic)
+        data_list_b_traffic_avg.append(avg_b_traffic)
+        data_list_b_range.append(counter_b_range)
+        data_list_b_range_avg.append(avg_b_range)
+        #
+
+        # add type
+        new_device_type = data_list_kind_of_devices_traffic_a[device_type - 1]
+        new_device_type += counter_a_traffic
+        data_list_kind_of_devices_traffic_a[device_type - 1] = new_device_type
+        #
+        new_device_type = data_list_kind_of_devices_traffic_b[device_type - 1]
+        new_device_type += counter_b_traffic
+        data_list_kind_of_devices_traffic_b[device_type - 1] = new_device_type
+
+        # add range
+        new_distance = data_list_kind_of_devices_distance_a[device_type - 1]
+        new_distance += counter_a_range
+        data_list_kind_of_devices_distance_a[device_type - 1] = new_distance
+
+        # max
+        new_max_distance = data_list_kind_of_devices_distance_a_max[device_type - 1]
+        if new_max_distance == 0:
+            new_max_distance = range_1
+        else:
+            if new_max_distance < range_1:
+                new_max_distance = range_1
+        data_list_kind_of_devices_distance_a_max[device_type - 1] = new_max_distance
+
+        new_max_distance = data_list_kind_of_devices_distance_b_max[device_type - 1]
+        if new_max_distance == 0:
+            new_max_distance = range_2
+        else:
+            if new_max_distance < range_2:
+                new_max_distance = range_2
+        data_list_kind_of_devices_distance_b_max[device_type - 1] = new_max_distance
+
+        # max traffic
+        new_max_traffic = data_list_kind_of_devices_traffic_a_max[device_type - 1]
+        if new_max_traffic == 0:
+            new_max_traffic = traffic_counter1
+        else:
+            if new_max_traffic < traffic_counter1:
+                new_max_traffic = traffic_counter1
+        data_list_kind_of_devices_traffic_a_max[device_type - 1] = new_max_traffic
+
+        new_max_traffic = data_list_kind_of_devices_traffic_b_max[device_type - 1]
+        if new_max_traffic == 0:
+            new_max_traffic = traffic_counter2
+        else:
+            if new_max_traffic < traffic_counter2:
+                new_max_traffic = traffic_counter2
+        data_list_kind_of_devices_traffic_b_max[device_type - 1] = new_max_traffic
+
+
+        # min
+        new_min_distance = data_list_kind_of_devices_distance_a_min[device_type - 1]
+        if new_min_distance == 0:
+            new_min_distance = range_1
+        else:
+            if new_min_distance > range_1:
+                new_min_distance = range_1
+        data_list_kind_of_devices_distance_a_min[device_type - 1] = new_min_distance
+
+        new_min_distance = data_list_kind_of_devices_distance_b_min[device_type - 1]
+        if new_min_distance == 0:
+            new_min_distance = range_2
+        else:
+            if new_min_distance > range_2:
+                new_min_distance = range_2
+        data_list_kind_of_devices_distance_b_min[device_type - 1] = new_min_distance
+
+        new_min_traffic = data_list_kind_of_devices_traffic_a_min[device_type - 1]
+        if new_min_traffic == 0:
+            new_min_traffic = traffic_counter1
+        else:
+            if new_min_traffic > traffic_counter1:
+                new_min_traffic = traffic_counter1
+        data_list_kind_of_devices_traffic_a_min[device_type - 1] = new_min_traffic
+
+        new_min_traffic = data_list_kind_of_devices_traffic_b_min[device_type - 1]
+        if new_min_traffic == 0:
+            new_min_traffic = traffic_counter2
+        else:
+            if new_min_traffic > traffic_counter2:
+                new_min_traffic = traffic_counter2
+        data_list_kind_of_devices_traffic_b_min[device_type - 1] = new_min_traffic
+
+
+
+        new_distance = data_list_kind_of_devices_distance_b[device_type - 1]
+        new_distance += counter_b_range
+        data_list_kind_of_devices_distance_b[device_type - 1] = new_distance
+
+
+        # print("\t'" + str(avg_a_traffic))
+        # print("\t'" + str(avg_b_traffic))
+        # print("\t and")
+        # print("\t'" + str(counter_a_range))
+        # print("\t'" + str(counter_b_range))
+
+    # print(data_list_a_traffic_avg)
+    # print(data_list_b_traffic_avg)
+    # print(data_list_kind_of_devices_traffic_a)
+    # print(data_list_kind_of_devices_traffic_b)
+
+    print(data_list_kind_of_devices_distance_a_max)
+    print(data_list_kind_of_devices_distance_a_min)
+
+    # save to
+    if not os.path.isdir(chart_data_save_path):
+        os.mkdir(chart_data_save_path)
+
+    # common
+    save_list_to_csv(data_list_kind_of_devices, os.path.join(chart_data_save_path, "common_kind_of_devices.csv"))
+    save_list_to_csv(data_list_a_traffic, os.path.join(chart_data_save_path, "common_a_traffic.csv"))
+    save_list_to_csv(data_list_b_traffic, os.path.join(chart_data_save_path, "common_b_traffic.csv"))
+    save_list_to_csv(data_list_a_range, os.path.join(chart_data_save_path, "common_a_distance.csv"))
+    save_list_to_csv(data_list_b_range, os.path.join(chart_data_save_path, "common_b_distance.csv"))
+
+    # chart1
+    save_list_to_csv(data_list_a_traffic_avg, os.path.join(chart_data_save_path, "x_users_y_traffic_avg_1.csv"))
+    save_list_to_csv(data_list_b_traffic_avg, os.path.join(chart_data_save_path, "x_users_y_traffic_avg_2.csv"))
+    # chart2
+
+    for c___ in range(len(data_list_kind_of_devices_traffic_a)):
+        a_data_list_kind_of_devices_traffic_a = data_list_kind_of_devices_traffic_a[c___]
+        a_data_list_kind_of_devices = data_list_kind_of_devices[c___]
+        a_data_list_kind_of_devices_traffic_a_avg = a_data_list_kind_of_devices_traffic_a / a_data_list_kind_of_devices
+        data_list_kind_of_devices_traffic_a[c___] = a_data_list_kind_of_devices_traffic_a_avg
+
+        a_data_list_kind_of_devices_traffic_b = data_list_kind_of_devices_traffic_b[c___]
+        a_data_list_kind_of_devices_traffic_b_avg = a_data_list_kind_of_devices_traffic_b / a_data_list_kind_of_devices
+        data_list_kind_of_devices_traffic_b[c___] = a_data_list_kind_of_devices_traffic_b_avg
+
+
+
+
+    save_list_to_csv(data_list_kind_of_devices_traffic_a, os.path.join(chart_data_save_path, "x_kind_of_devices_y_traffic_avg_1.csv"))
+    save_list_to_csv(data_list_kind_of_devices_traffic_b, os.path.join(chart_data_save_path, "x_kind_of_devices_y_traffic_avg_2.csv"))
+    save_list_to_csv(data_list_kind_of_devices_traffic_a_max, os.path.join(chart_data_save_path, "x_kind_of_devices_y_traffic_max_1.csv"))
+    save_list_to_csv(data_list_kind_of_devices_traffic_a_min, os.path.join(chart_data_save_path, "x_kind_of_devices_y_traffic_min_1.csv"))
+    # save_list_to_csv(data_list_kind_of_devices_traffic_b, os.path.join(chart_data_save_path, "x_kind_of_devices_y_traffic_sum_2.csv"))
+    save_list_to_csv(data_list_kind_of_devices_traffic_b_max, os.path.join(chart_data_save_path, "x_kind_of_devices_y_traffic_max_2.csv"))
+    save_list_to_csv(data_list_kind_of_devices_traffic_b_min, os.path.join(chart_data_save_path, "x_kind_of_devices_y_traffic_min_2.csv"))
+
+    # chart5
+    save_list_to_csv(data_list_a_range_avg, os.path.join(chart_data_save_path, "x_users_y_distance_avg_1.csv"))
+    save_list_to_csv(data_list_b_range_avg, os.path.join(chart_data_save_path, "x_users_y_distance_avg_2.csv"))
+    # chart6
+    save_list_to_csv(data_list_kind_of_devices_distance_a_max,
+                     os.path.join(chart_data_save_path, "x_kind_of_devices_y_distance_max_1.csv"))
+    save_list_to_csv(data_list_kind_of_devices_distance_a_min,
+                     os.path.join(chart_data_save_path, "x_kind_of_devices_y_distance_min_1.csv"))
+    save_list_to_csv(data_list_kind_of_devices_distance_b_max,
+                     os.path.join(chart_data_save_path, "x_kind_of_devices_y_distance_max_2.csv"))
+    save_list_to_csv(data_list_kind_of_devices_distance_b_min,
+                     os.path.join(chart_data_save_path, "x_kind_of_devices_y_distance_min_2.csv"))
+    # save_list_to_csv(data_list_kind_of_devices_distance_a, os.path.join(chart_data_save_path, "x_kind_of_devices_y_distance_sum_1.csv"))
+    # save_list_to_csv(data_list_kind_of_devices_distance_b, os.path.join(chart_data_save_path, "x_kind_of_devices_y_distance_sum_2.csv"))
+
 
 
 if __name__ == '__main__':
+    select_day = 2
+    select_hour = 4
 
-    my_user = 3337
-    find_user_device_type = 5  # set type
-
-    select_day = 1
-    select_hour = 1
-
-    user_1_s_cluster = ClusterTool.find_user_in_which_cluster(all_values_list, select_day, select_hour, my_user)
-    all_users_in_this_cluster = ClusterTool.find_all_users_in_this_cluster(all_values_list, devices_type_list,
-                                                                           select_day, select_hour, user_1_s_cluster,
-                                                                           device_type=find_user_device_type)
-    print(all_users_in_this_cluster)
-
-
-
-    # neighbor_clusters = ClusterTool.get_neighbor_clusters(10, 10, 11)
-    # for neighbor_cluster in neighbor_clusters:
-    #     all_users_in_this_neighbor_cluster = ClusterTool.find_all_users_in_this_cluster(all_values_list, select_day,
-    #                                                                                     select_hour, neighbor_cluster)
-
-
-
-
-
-
-
-
-
-    # print(all_users_in_this_cluster)
-
-
-
-
-
-# check user 1 to use
-
-
-# print(all_values_matrix)
-
-
-
-
-
-
-
-
-
-# CSVTool.read_som_matrix()
-
-
-
-
-
-# DataProcessTool.classification_all_users_from_result_matrix()
-
-# classification_all_users_from_result_matrix
+    # data 1
+    test_the_number_of_users_and_traffic(select_day, select_hour)
