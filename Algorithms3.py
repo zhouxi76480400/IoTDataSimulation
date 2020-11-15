@@ -663,10 +663,10 @@ def get_chart_1_data(day, hour_):
     max_user_count = 300
 
     start_repeat = 0
-    stop_repeat = 40
+    stop_repeat = 4
 
     for i in range(start_repeat, stop_repeat):
-        now_user_value = i * 100 + 100
+        now_user_value = i * 1000 + 1000
         print("time:" + str(now_user_value))
         x_axis.append(now_user_value)
         # 隨機個用戶
@@ -765,9 +765,9 @@ def get_chart_1_data(day, hour_):
         # a_time_traffics_avg_by_1 = sum(a_time_traffics_by_1) / all_test_user_count
         # a_time_traffics_avg_by_2 = sum(a_time_traffics_by_2) / all_test_user_count
         a_time_traffics_avg_by_1 = a_time_traffics_by_1
-        print(a_time_traffics_by_1)
+        # print(a_time_traffics_by_1)
         a_time_traffics_avg_by_2 = a_time_traffics_by_2
-        print(a_time_traffics_by_2)
+        # print(a_time_traffics_by_2)
         # y_axis_traffic_avg_1.append(a_time_traffics_avg_by_1)
         # y_axis_traffic_avg_2.append(a_time_traffics_avg_by_2)
         y_axis_traffic_avg_1.append(sum(a_time_traffics_avg_by_1))
@@ -801,33 +801,74 @@ def get_chart_1_data(day, hour_):
     # print(y_axis_device_type_and_traffic_min_2)
 
     # print(x_axis)
-    save_list_to_csv(x_axis, os.path.join(chart_data_save_path, "chart_1_5_x.csv"))
-    # print(y_axis_traffic_avg_1)
-    save_list_to_csv(y_axis_traffic_avg_1, os.path.join(chart_data_save_path, "chart_1_y1.csv"))
-    # print(y_axis_traffic_avg_2)
-    save_list_to_csv(y_axis_traffic_avg_2, os.path.join(chart_data_save_path, "chart_1_y2.csv"))
-    # print(y_axis_distance_avg_1)
-    save_list_to_csv(y_axis_distance_avg_1, os.path.join(chart_data_save_path, "chart_5_y1.csv"))
-    # print(y_axis_distance_avg_2)
-    save_list_to_csv(y_axis_distance_avg_2, os.path.join(chart_data_save_path, "chart_5_y2.csv"))
+    # save_list_to_csv(x_axis, os.path.join(chart_data_save_path, "chart_1_5_x.csv"))
+    # # print(y_axis_traffic_avg_1)
+    # save_list_to_csv(y_axis_traffic_avg_1, os.path.join(chart_data_save_path, "chart_1_y1.csv"))
+    # # print(y_axis_traffic_avg_2)
+    # save_list_to_csv(y_axis_traffic_avg_2, os.path.join(chart_data_save_path, "chart_1_y2.csv"))
+    # # print(y_axis_distance_avg_1)
+    # save_list_to_csv(y_axis_distance_avg_1, os.path.join(chart_data_save_path, "chart_5_y1.csv"))
+    # # print(y_axis_distance_avg_2)
+    # save_list_to_csv(y_axis_distance_avg_2, os.path.join(chart_data_save_path, "chart_5_y2.csv"))
 
-    save_list_to_csv(y_axis_device_type_and_distance_max_1, os.path.join(chart_data_save_path, "chart_6_y1_max.csv"))
-    save_list_to_csv(y_axis_device_type_and_distance_max_2, os.path.join(chart_data_save_path, "chart_6_y2_max.csv"))
-    save_list_to_csv(y_axis_device_type_and_distance_min_1, os.path.join(chart_data_save_path, "chart_6_y1_min.csv"))
-    save_list_to_csv(y_axis_device_type_and_distance_min_2, os.path.join(chart_data_save_path, "chart_6_y2_min.csv"))
+    # save_list_to_csv(y_axis_device_type_and_distance_max_1, os.path.join(chart_data_save_path, "chart_6_y1_max.csv"))
+    # save_list_to_csv(y_axis_device_type_and_distance_max_2, os.path.join(chart_data_save_path, "chart_6_y2_max.csv"))
+    # save_list_to_csv(y_axis_device_type_and_distance_min_1, os.path.join(chart_data_save_path, "chart_6_y1_min.csv"))
+    # save_list_to_csv(y_axis_device_type_and_distance_min_2, os.path.join(chart_data_save_path, "chart_6_y2_min.csv"))
+    #
+    # save_list_to_csv(y_axis_device_type_and_traffic_max_1, os.path.join(chart_data_save_path, "chart_2_y1_max.csv"))
+    # save_list_to_csv(y_axis_device_type_and_traffic_max_2, os.path.join(chart_data_save_path, "chart_2_y2_max.csv"))
+    # save_list_to_csv(y_axis_device_type_and_traffic_min_1, os.path.join(chart_data_save_path, "chart_2_y1_min.csv"))
+    # save_list_to_csv(y_axis_device_type_and_traffic_min_2, os.path.join(chart_data_save_path, "chart_2_y2_min.csv"))
+    return y_axis_traffic_avg_1, y_axis_traffic_avg_2, y_axis_distance_avg_1, y_axis_distance_avg_2
 
-    save_list_to_csv(y_axis_device_type_and_traffic_max_1, os.path.join(chart_data_save_path, "chart_2_y1_max.csv"))
-    save_list_to_csv(y_axis_device_type_and_traffic_max_2, os.path.join(chart_data_save_path, "chart_2_y2_max.csv"))
-    save_list_to_csv(y_axis_device_type_and_traffic_min_1, os.path.join(chart_data_save_path, "chart_2_y1_min.csv"))
-    save_list_to_csv(y_axis_device_type_and_traffic_min_2, os.path.join(chart_data_save_path, "chart_2_y2_min.csv"))
+
+def get_mean(list_a):
+    c = 0
+    for list_a_a in list_a:
+        c += list_a_a
+    return c / len(list_a)
 
 
 if __name__ == '__main__':
-    select_day = 2
-    select_hour = 4
 
-    # data 1
-    get_chart_1_data(select_day, select_hour)
+    day_sum_t_1 = []
+    day_sum_t_2 = []
+
+    day_mean_d_1 = []
+    day_mean_d_2 = []
+
+    day_hour = 24
+    for day in range(1,3):
+        print(day)
+        select_day = day
+
+        for hour in range(day_hour):
+            select_hour = hour
+            print("\t" + str(hour))
+            t_1, t_2, d_1, d_2 = get_chart_1_data(select_day, select_hour)
+
+            sum_t_1 = sum(t_1) #
+            sum_t_2 = sum(t_2) #
+
+            mean_d_1 = get_mean(d_1) #
+            mean_d_2 = get_mean(d_2) #
+
+            day_sum_t_1.append(sum_t_1)
+            day_sum_t_2.append(sum_t_2)
+
+            day_mean_d_1.append(mean_d_1)
+            day_mean_d_2.append(mean_d_2)
+
+    save_list_to_csv(day_sum_t_1, os.path.join(chart_data_save_path, "chart_4_y1.csv"))
+    save_list_to_csv(day_sum_t_2, os.path.join(chart_data_save_path, "chart_4_y2.csv"))
+    save_list_to_csv(day_mean_d_1, os.path.join(chart_data_save_path, "chart_8_y1.csv"))
+    save_list_to_csv(day_mean_d_2, os.path.join(chart_data_save_path, "chart_8_y2.csv"))
+    # print(day_sum_t_1)
+    # print(day_sum_t_2)
+    # print(day_mean_d_1)
+    # print(day_mean_d_2)
+
 
 
 
