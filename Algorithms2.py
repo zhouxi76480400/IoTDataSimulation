@@ -11,7 +11,7 @@ workspace_path = os.path.join(os.path.split(__file__)[0], "output")
 
 chart_data_save_path = os.path.join(workspace_path, "chart_data")
 
-data_set_folders = ["data_from_day_3", "data_from_day_4"]
+data_set_folders = ["data_from_day_4", "data_from_day_5"]
 
 som_matrix_name = "matrix.csv"
 
@@ -114,6 +114,7 @@ def find_close_users(day: int, hour_: int, my_user_name: str, range_: float, int
                 traffic_count += 1
                 if has_this_type_device(user_tmp_name, interest_device_type):
                     distance_list.append((user_tmp_name, between_))
+    # print("traffic_count???:" + str(traffic_count))
     return distance_list, traffic_count
 
 
@@ -301,17 +302,24 @@ def a2(day: int, hour_: int, my_user_name: str, interest_device_type: int, range
     traffic_counter = 0
     range_ = range_expand_each_time
     max_try_times = int(math.sqrt(2) / range_expand_each_time) + 1
+    # print("max_try_time:" + str(max_try_times))
     #
     close_users = []
     while len(close_users) < 1 and traffic_counter < max_try_times:
         close_users, traffic_counter_now = find_close_users(day, hour_, my_user_name, range_, interest_device_type)
+        # print("traffic ++ :" + str(traffic_counter_now))
         traffic_counter += traffic_counter_now
         range_ += range_expand_each_time
     close_users = sorted(close_users, key=sort_get_distance)
 
+
     nearest = math.sqrt(2)
     if len(close_users) != 0:
         nearest = close_users[0][1]
+
+    # if traffic_counter > 100:
+    #     print("大於>?:" + str(traffic_counter) +", nearest:"+ str(nearest) +
+    #           "list:" +str(close_users) + "my_name:" + my_user_name + "")
 
     return traffic_counter, nearest  # range_
 
@@ -823,8 +831,8 @@ def get_chart_1_data(day, hour_):
 
 
 if __name__ == '__main__':
-    select_day = 2
-    select_hour = 4
+    select_day = 1
+    select_hour = 0
 
     # data 1
     get_chart_1_data(select_day, select_hour)

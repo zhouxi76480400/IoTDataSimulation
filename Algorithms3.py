@@ -14,7 +14,7 @@ workspace_path = os.path.join(os.path.split(__file__)[0], "output")
 
 chart_data_save_path = os.path.join(workspace_path, "chart_data")
 
-data_set_folders = ["data_from_day_3", "data_from_day_4"]
+data_set_folders = ["data_from_day_4", "data_from_day_5"]
 
 som_matrix_name = "matrix.csv"
 
