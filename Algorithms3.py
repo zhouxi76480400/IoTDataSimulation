@@ -191,51 +191,51 @@ def algorithm1_sub1(hit_list, neighbors):
     return get_all_neighbor_s_neighbor(hit_list, neighbors)
 
 
-def algorithm1(day: int, hour_: int, my_user_name: str, interest_device_type: int):
-    traffic = 1
-    #
-    hit_list = []
-    for h_pos in range(100):
-        hit_list.append(False)
-
-    #
-    first_cluster = ClusterTool.find_user_in_which_cluster(all_values_list, day, hour_, int(my_user_name))
-    neighbors = [first_cluster]
-
-    hit_list[first_cluster] = True
-    #
-    neighbor_users = ClusterTool.find_all_users_in_this_cluster(all_values_list, devices_type_list, day, hour_,
-                                                                first_cluster, interest_device_type)
-    if len(neighbor_users) == 1:
-        if str(neighbor_users[0]) == my_user_name:
-            neighbor_users = []
-
-    if len(neighbor_users) == 0:
-        while check_cluster_check_left_time(hit_list) > 0 and not len(neighbor_users) > 0:
-            neighbors = algorithm1_sub1(hit_list, neighbors)
-            # print(neighbors)
-            for neighbor in neighbors:
-                neighbor_users = \
-                    ClusterTool. \
-                        find_all_users_in_this_cluster(all_values_list,
-                                                       devices_type_list,
-                                                       day, hour_, neighbor, interest_device_type)
-                traffic += 1
-                if len(neighbor_users) > 0:
-                    break
-    range_list = []
-    # print("aaaa:" + str(neighbor_users))
-    if len(neighbor_users) > 0:
-        for neighbor_user in neighbor_users:
-            if str(neighbor_user) != my_user_name:
-                range_list.append(calculate_the_user_s_between(day, hour_, str(my_user_name), str(neighbor_user))
-                              )
-        if len(range_list) == 0:
-            print("用0")
-            return traffic, 0
-        else:
-            return traffic, min(range_list)
-    return traffic, -1
+# def algorithm1(day: int, hour_: int, my_user_name: str, interest_device_type: int):
+#     traffic = 1
+#     #
+#     hit_list = []
+#     for h_pos in range(100):
+#         hit_list.append(False)
+#
+#     #
+#     first_cluster = ClusterTool.find_user_in_which_cluster(all_values_list, day, hour_, int(my_user_name))
+#     neighbors = [first_cluster]
+#
+#     hit_list[first_cluster] = True
+#     #
+#     neighbor_users = ClusterTool.find_all_users_in_this_cluster(all_values_list, devices_type_list, day, hour_,
+#                                                                 first_cluster, interest_device_type)
+#     if len(neighbor_users) == 1:
+#         if str(neighbor_users[0]) == my_user_name:
+#             neighbor_users = []
+#
+#     if len(neighbor_users) == 0:
+#         while check_cluster_check_left_time(hit_list) > 0 and not len(neighbor_users) > 0:
+#             neighbors = algorithm1_sub1(hit_list, neighbors)
+#             # print(neighbors)
+#             for neighbor in neighbors:
+#                 neighbor_users = \
+#                     ClusterTool. \
+#                         find_all_users_in_this_cluster(all_values_list,
+#                                                        devices_type_list,
+#                                                        day, hour_, neighbor, interest_device_type)
+#                 traffic += 1
+#                 if len(neighbor_users) > 0:
+#                     break
+#     range_list = []
+#     # print("aaaa:" + str(neighbor_users))
+#     if len(neighbor_users) > 0:
+#         for neighbor_user in neighbor_users:
+#             if str(neighbor_user) != my_user_name:
+#                 range_list.append(calculate_the_user_s_between(day, hour_, str(my_user_name), str(neighbor_user))
+#                               )
+#         if len(range_list) == 0:
+#             print("用0")
+#             return traffic, 0
+#         else:
+#             return traffic, min(range_list)
+#     return traffic, -1
 
 
 def save_list_to_csv(list_, save_file_path):
