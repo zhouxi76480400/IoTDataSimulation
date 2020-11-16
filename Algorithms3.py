@@ -7,6 +7,9 @@ from data_tools import ClusterTool
 import math
 import random
 
+
+# for chart 4, 8
+
 workspace_path = os.path.join(os.path.split(__file__)[0], "output")
 
 chart_data_save_path = os.path.join(workspace_path, "chart_data")
@@ -659,14 +662,15 @@ def get_chart_1_data(day, hour_):
     y_axis_device_type_and_distance_min_2 = [[], [], [], [], []]
 
 
-    start_user_count = 100
-    max_user_count = 300
+    # start_user_count = 100
+    # max_user_count = 300
 
     start_repeat = 0
-    stop_repeat = 4
+    stop_repeat = 40
 
     for i in range(start_repeat, stop_repeat):
-        now_user_value = i * 1000 + 1000
+        # now_user_value = i * 1000 + 1000
+        now_user_value = i * 100 + 100
         print("time:" + str(now_user_value))
         x_axis.append(now_user_value)
         # 隨機個用戶
