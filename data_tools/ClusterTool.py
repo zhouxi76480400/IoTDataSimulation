@@ -15,6 +15,11 @@ def find_user_in_which_cluster(mat, day: int, hour_: int, user: int):
     return return_value
 
 
+def has_this_type_device(devices_type_list, user_name: str, device_type: int):
+    has: bool = devices_type_list[int(user_name)][device_type - 1]
+    return has
+
+
 def find_all_users_in_this_cluster(mat, all_user_devices_type_list,
                                    day: int, hour_: int, cluster_position: int, device_type=-1):
     return_value = []
@@ -30,8 +35,7 @@ def find_all_users_in_this_cluster(mat, all_user_devices_type_list,
     new_list_to_return = []
     if device_type != -1:
         for a_id_user in return_value:
-            has = all_user_devices_type_list[a_id_user][device_type - 1]
-            if has:
+            if has_this_type_device(all_user_devices_type_list, str(a_id_user), device_type):
                 new_list_to_return.append(a_id_user)
         return new_list_to_return
     return return_value
