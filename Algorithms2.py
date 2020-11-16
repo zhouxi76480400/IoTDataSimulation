@@ -186,51 +186,51 @@ def algorithm1_sub1(hit_list, neighbors):
     return get_all_neighbor_s_neighbor(hit_list, neighbors)
 
 
-def algorithm1(day: int, hour_: int, my_user_name: str, interest_device_type: int):
-    traffic = 1
-    #
-    hit_list = []
-    for h_pos in range(100):
-        hit_list.append(False)
-
-    #
-    first_cluster = ClusterTool.find_user_in_which_cluster(all_values_list, day, hour_, int(my_user_name))
-    neighbors = [first_cluster]
-
-    hit_list[first_cluster] = True
-    #
-    neighbor_users = ClusterTool.find_all_users_in_this_cluster(all_values_list, devices_type_list, day, hour_,
-                                                                first_cluster, interest_device_type)
-    if len(neighbor_users) == 1:
-        if str(neighbor_users[0]) == my_user_name:
-            neighbor_users = []
-
-    if len(neighbor_users) == 0:
-        while check_cluster_check_left_time(hit_list) > 0 and not len(neighbor_users) > 0:
-            neighbors = algorithm1_sub1(hit_list, neighbors)
-            # print(neighbors)
-            for neighbor in neighbors:
-                neighbor_users = \
-                    ClusterTool. \
-                        find_all_users_in_this_cluster(all_values_list,
-                                                       devices_type_list,
-                                                       day, hour_, neighbor, interest_device_type)
-                traffic += 1
-                if len(neighbor_users) > 0:
-                    break
-    range_list = []
-    # print("aaaa:" + str(neighbor_users))
-    if len(neighbor_users) > 0:
-        for neighbor_user in neighbor_users:
-            if str(neighbor_user) != my_user_name:
-                range_list.append(calculate_the_user_s_between(day, hour_, str(my_user_name), str(neighbor_user))
-                              )
-        if len(range_list) == 0:
-            print("用0")
-            return traffic, 0
-        else:
-            return traffic, min(range_list)
-    return traffic, -1
+# def algorithm1(day: int, hour_: int, my_user_name: str, interest_device_type: int):
+#     traffic = 1
+#     #
+#     hit_list = []
+#     for h_pos in range(100):
+#         hit_list.append(False)
+#
+#     #
+#     first_cluster = ClusterTool.find_user_in_which_cluster(all_values_list, day, hour_, int(my_user_name))
+#     neighbors = [first_cluster]
+#
+#     hit_list[first_cluster] = True
+#     #
+#     neighbor_users = ClusterTool.find_all_users_in_this_cluster(all_values_list, devices_type_list, day, hour_,
+#                                                                 first_cluster, interest_device_type)
+#     if len(neighbor_users) == 1:
+#         if str(neighbor_users[0]) == my_user_name:
+#             neighbor_users = []
+#
+#     if len(neighbor_users) == 0:
+#         while check_cluster_check_left_time(hit_list) > 0 and not len(neighbor_users) > 0:
+#             neighbors = algorithm1_sub1(hit_list, neighbors)
+#             # print(neighbors)
+#             for neighbor in neighbors:
+#                 neighbor_users = \
+#                     ClusterTool. \
+#                         find_all_users_in_this_cluster(all_values_list,
+#                                                        devices_type_list,
+#                                                        day, hour_, neighbor, interest_device_type)
+#                 traffic += 1
+#                 if len(neighbor_users) > 0:
+#                     break
+#     range_list = []
+#     # print("aaaa:" + str(neighbor_users))
+#     if len(neighbor_users) > 0:
+#         for neighbor_user in neighbor_users:
+#             if str(neighbor_user) != my_user_name:
+#                 range_list.append(calculate_the_user_s_between(day, hour_, str(my_user_name), str(neighbor_user))
+#                               )
+#         if len(range_list) == 0:
+#             print("用0")
+#             return traffic, 0
+#         else:
+#             return traffic, min(range_list)
+#     return traffic, -1
 
 
 def save_list_to_csv(list_, save_file_path):
@@ -285,7 +285,10 @@ def a1(day: int, hour_: int, my_user_name: str, interest_device_type: int):
             print("用0")
             return traffic, 0
         else:
-            return traffic, min(range_list)
+            # print("from A:"+ str(range_list))
+            minlist = min(range_list)
+            # print("from A min:"+ str(minlist))
+            return traffic, minlist
     return traffic, -1
 
 
@@ -293,23 +296,17 @@ def a2(day: int, hour_: int, my_user_name: str, interest_device_type: int, range
     traffic_counter = 0
     range_ = range_expand_each_time
     max_try_times = int(math.sqrt(2) / range_expand_each_time) + 1
-    # print("max_try_time:" + str(max_try_times))
     #
     close_users = []
     while len(close_users) < 1 and traffic_counter < max_try_times:
         close_users, traffic_counter_now = find_close_users(day, hour_, my_user_name, range_, interest_device_type)
-        # print("traffic ++ :" + str(traffic_counter_now))
         traffic_counter += traffic_counter_now
         range_ += range_expand_each_time
     close_users = sorted(close_users, key=sort_get_distance)
-
     nearest = math.sqrt(2)
     if len(close_users) != 0:
+        # print("from B:" + str(close_users))
         nearest = close_users[0][1]
-
-    # if traffic_counter > 100:
-    print("大於>?:" + str(traffic_counter) +", nearest:"+ str(nearest) +
-            "list:" +str(close_users) + "my_name:" + my_user_name + "")
 
     return traffic_counter, nearest  # range_
 

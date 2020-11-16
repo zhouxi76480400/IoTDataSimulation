@@ -662,12 +662,14 @@ def get_chart_1_data(day, hour_):
     # start_user_count = 100
     # max_user_count = 300
 
-    start_repeat = 0
-    stop_repeat = 40
+    # start_repeat = 0
+    # stop_repeat = 40
 
-    for i in range(start_repeat, stop_repeat):
+    # for i in range(start_repeat, stop_repeat):
+    for i in range(0):
         # now_user_value = i * 1000 + 1000
-        now_user_value = i * 100 + 100
+        # now_user_value = i * 100 + 100
+        now_user_value = 4000
         print("time:" + str(now_user_value))
         x_axis.append(now_user_value)
         # 隨機個用戶
