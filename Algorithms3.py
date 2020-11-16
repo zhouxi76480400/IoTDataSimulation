@@ -666,7 +666,7 @@ def get_chart_1_data(day, hour_):
     # stop_repeat = 40
 
     # for i in range(start_repeat, stop_repeat):
-    for i in range(0):
+    for i in range(1):
         # now_user_value = i * 1000 + 1000
         # now_user_value = i * 100 + 100
         now_user_value = 4000
