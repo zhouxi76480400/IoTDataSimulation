@@ -7,6 +7,8 @@ from data_tools import ClusterTool
 import math
 import random
 
+#  調整request 的百分比 來算出avg distance 和 avg cost 的區別
+
 workspace_path = os.path.join(os.path.split(__file__)[0], "output")
 
 chart_data_save_path = os.path.join(workspace_path, "chart_data")
@@ -324,7 +326,15 @@ def get_all_min_global(list_global):
         list_ret.append(sum(a_list)/len(a_list))
     return list_ret
 
-
+def get_avg_from_list(double_list: list):
+    avg: float = 0.
+    if len(double_list) > 0:
+        tmp_float: float = 0.
+        for ll in double_list:
+            tmp_float += ll
+        tmp_float /= len(double_list)
+        avg = tmp_float
+    return avg
 
 def get_chart_1_data(day, hour_):
     #
@@ -354,19 +364,28 @@ def get_chart_1_data(day, hour_):
     # y_axis_device_type_and_traffic_avg_2 = [0, 0, 0, 0, 0]
     y_axis_device_type_and_distance_min_2 = [[], [], [], [], []]
 
+    average_communication_cost_1_for_all_device_type = [[], [], [], [], []]
+    average_communication_cost_2_for_all_device_type = [[], [], [], [], []]
+    average_distance_1_for_all_device_type = [[], [], [], [], []]
+    average_distance_2_for_all_device_type = [[], [], [], [], []]
+
 
     start_user_count = 100
     max_user_count = 300
 
+    # start_repeat = 0
+    # stop_repeat = 40
     start_repeat = 0
-    stop_repeat = 40
+    stop_repeat = 1
 
     for i in range(start_repeat, stop_repeat):
-        now_user_value = i * 100 + 100
+        # now_user_value = i * 100 + 100
+        now_user_value = 4000
         print("time:" + str(now_user_value))
         x_axis.append(now_user_value)
         # 隨機個用戶
-        all_test_user = get_users_by_random_10_percent(now_user_value)
+        # all_test_user = get_users_by_random_10_percent(now_user_value)
+        all_test_user = list(range(0,now_user_value-1))
         all_test_user_count = len(all_test_user)
         #
         a_time_traffics_by_1 = []
@@ -388,6 +407,13 @@ def get_chart_1_data(day, hour_):
         a_time_device_traffic_max_2 = [0, 0, 0, 0, 0]
         a_time_device_traffic_min_1 = [1, 1, 1, 1, 1]
         a_time_device_traffic_min_2 = [1, 1, 1, 1, 1]
+
+        # 第一種方法
+        all_types_communication_list_1 = [[], [], [], [], []]
+        all_types_distance_list_1 = [[], [], [], [], []]
+        # 第2種方法
+        all_types_communication_list_2 = [[], [], [], [], []]
+        all_types_distance_list_2 = [[], [], [], [], []]
 
         for a_test_user in all_test_user:
             interested_device = get_interested_device_type()
@@ -420,6 +446,12 @@ def get_chart_1_data(day, hour_):
             set_min(a_time_device_traffic_min_1, interested_device, traffic_1)
             set_min(a_time_device_traffic_min_2, interested_device, traffic_2)
 
+            # 保存數據到
+            all_types_communication_list_1[interested_device - 1].append(traffic_1)
+            all_types_communication_list_2[interested_device - 1].append(traffic_2)
+            all_types_distance_list_1[interested_device - 1].append(range_1)
+            all_types_distance_list_2[interested_device - 1].append(range_2)
+
 
         # calc avg
         a_time_device_distance_avg_1 = [0, 0, 0, 0, 0]
@@ -439,6 +471,29 @@ def get_chart_1_data(day, hour_):
         set_max_to_global(a_time_device_traffic_max_2, y_axis_device_type_and_traffic_max_2)
         set_max_to_global(a_time_device_traffic_min_1, y_axis_device_type_and_traffic_min_1)
         set_max_to_global(a_time_device_traffic_min_2, y_axis_device_type_and_traffic_min_2)
+
+        # 求平均cost
+        for i_device_type in range(len(all_types_communication_list_1)):
+            list_all_cost_data1 = all_types_communication_list_1[i_device_type]
+            avg_cost_data1 = get_avg_from_list(list_all_cost_data1)
+            list_all_cost_data2 = all_types_communication_list_2[i_device_type]
+            avg_cost_data2 = get_avg_from_list(list_all_cost_data2)
+            # 送到上層
+            average_communication_cost_1_for_all_device_type[i_device_type].append(avg_cost_data1)
+            average_communication_cost_2_for_all_device_type[i_device_type].append(avg_cost_data2)
+            #求平均distance
+            list_all_distance_data1 = all_types_distance_list_1[i_device_type]
+            avg_distance_data1 = get_avg_from_list(list_all_distance_data1)
+            average_distance_1_for_all_device_type[i_device_type].append(avg_distance_data1)
+            list_all_distance_data2 = all_types_distance_list_2[i_device_type]
+            avg_distance_data2 = get_avg_from_list(list_all_distance_data2)
+            average_distance_2_for_all_device_type[i_device_type].append(avg_distance_data2)
+            print("avg_distance_of_user:" + str(now_user_value) + ",a1:" + str(avg_distance_data1))
+            print("avg_distance_of_user:" + str(now_user_value) + ",a2:" + str(avg_distance_data2))
+            print("avg_comm_cost_of_user:" + str(now_user_value) + ",a1:" + str(avg_cost_data1))
+            print("avg_comm_cost_of_user:" + str(now_user_value) + ",a2:" + str(avg_cost_data2))
+
+
 
 
         # print(a_time_device_traffic_max_1)
@@ -512,10 +567,41 @@ def get_chart_1_data(day, hour_):
     # save_list_to_csv(y_axis_device_type_and_distance_min_1, os.path.join(chart_data_save_path, "chart_6_y1_min.csv"))
     # save_list_to_csv(y_axis_device_type_and_distance_min_2, os.path.join(chart_data_save_path, "chart_6_y2_min.csv"))
     #
-    save_list_to_csv(y_axis_device_type_and_traffic_max_1, os.path.join(chart_data_save_path, "chart_2_y1_max.csv"))
-    save_list_to_csv(y_axis_device_type_and_traffic_max_2, os.path.join(chart_data_save_path, "chart_2_y2_max.csv"))
-    save_list_to_csv(y_axis_device_type_and_traffic_min_1, os.path.join(chart_data_save_path, "chart_2_y1_min.csv"))
-    save_list_to_csv(y_axis_device_type_and_traffic_min_2, os.path.join(chart_data_save_path, "chart_2_y2_min.csv"))
+
+    #算總的平均cost
+
+    global_average_communication_cost1 = [0, 0, 0, 0, 0]
+    global_average_communication_cost2 = [0, 0, 0, 0, 0]
+    global_average_distance1 = [0, 0, 0, 0, 0]
+    global_average_distance2 = [0, 0, 0, 0, 0]
+
+    for global_i_ in range(len(average_communication_cost_1_for_all_device_type)):
+        global_i_list1 = average_communication_cost_1_for_all_device_type[global_i_]
+        global_i_list1_avg = get_avg_from_list(global_i_list1)
+        global_average_communication_cost1[global_i_] = global_i_list1_avg
+        global_i_list2 = average_communication_cost_2_for_all_device_type[global_i_]
+        global_i_list2_avg = get_avg_from_list(global_i_list2)
+        global_average_communication_cost2[global_i_] = global_i_list2_avg
+        #
+        global_i_distance_list1 = average_distance_1_for_all_device_type[global_i_]
+        global_i_distance_list1_avg = get_avg_from_list(global_i_distance_list1)
+        global_average_distance1[global_i_] = global_i_distance_list1_avg
+        global_i_distance_list2 = average_distance_2_for_all_device_type[global_i_]
+        global_i_distance_list2_avg = get_avg_from_list(global_i_distance_list2)
+        global_average_distance2[global_i_] = global_i_distance_list2_avg
+
+        # average_distance_1_for_all_device_type
+
+    save_list_to_csv(global_average_communication_cost1, os.path.join(chart_data_save_path, "chart_2_y1.csv"))
+    save_list_to_csv(global_average_communication_cost2, os.path.join(chart_data_save_path, "chart_2_y2.csv"))
+    save_list_to_csv(global_average_distance1, os.path.join(chart_data_save_path, "chart_6_y1.csv"))
+    save_list_to_csv(global_average_distance2, os.path.join(chart_data_save_path, "chart_6_y2.csv"))
+
+
+    # save_list_to_csv(y_axis_device_type_and_traffic_max_1, os.path.join(chart_data_save_path, "chart_2_y1_max.csv"))
+    # save_list_to_csv(y_axis_device_type_and_traffic_max_2, os.path.join(chart_data_save_path, "chart_2_y2_max.csv"))
+    # save_list_to_csv(y_axis_device_type_and_traffic_min_1, os.path.join(chart_data_save_path, "chart_2_y1_min.csv"))
+    # save_list_to_csv(y_axis_device_type_and_traffic_min_2, os.path.join(chart_data_save_path, "chart_2_y2_min.csv"))
 
 
 if __name__ == '__main__':
