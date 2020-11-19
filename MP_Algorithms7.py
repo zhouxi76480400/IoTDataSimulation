@@ -35,10 +35,10 @@ def run_func(ratio):
         interested_device = Algorithms7.get_interested_device_type()
 
         traffic1, distance1 = \
-            Algorithms7.a1(selected_day, selected_hour, interested_device)
+            Algorithms7.a1(selected_day, selected_hour, a_test_user_str, interested_device)
 
         traffic2, distance2 = \
-            Algorithms7.a2(selected_day, selected_hour, interested_device, 0.004)
+            Algorithms7.a2(selected_day, selected_hour, a_test_user_str, interested_device, 0.004)
 
         func_traffic_1.append(traffic1)
         func_traffic_2.append(traffic2)
@@ -53,8 +53,12 @@ def run_func(ratio):
     func_distance_1_avg = Algorithms7.get_avg_from_list(func_distance_1)
     func_distance_2_avg = Algorithms7.get_avg_from_list(func_distance_2)
 
+    # 求和
+    func_traffic_1_all = Algorithms7.get_summary_from_list(func_traffic_1)
+    func_traffic_2_all = Algorithms7.get_summary_from_list(func_traffic_1)
+
     # avg distance1 avg distance2 avg cost 1 avg cost2
-    return func_distance_1_avg, func_distance_2_avg, func_traffic_1_avg, func_traffic_2_avg
+    return func_distance_1_avg, func_distance_2_avg, func_traffic_1_avg, func_traffic_2_avg, func_traffic_1_all, func_traffic_2_all
 
 
 if __name__ == '__main__':
@@ -79,6 +83,9 @@ if __name__ == '__main__':
     global_cost_1 = []
     global_cost_2 = []
 
+    global_cost_1_all = []
+    global_cost_2_all = []
+
     # 整理
     for i in range(len(result_all)):
         ret_obj = result_all[i]
@@ -94,12 +101,23 @@ if __name__ == '__main__':
         global_cost_1.append(cost_1)
         global_cost_2.append(cost_2)
 
+        cost_all_1 = ret_obj.get()[4]
+        cost_all_2 = ret_obj.get()[5]
+
+        global_cost_1_all.append(cost_all_1)
+        global_cost_2_all.append(cost_all_2)
+
     print("gd1" + str(global_distance_1))
     print("gd2" + str(global_distance_2))
     print("gc1" + str(global_cost_1))
     print("gc2" + str(global_cost_2))
+    print("gca1" + str(global_cost_1_all))
+    print("gca2" + str(global_cost_2_all))
     Algorithms7.save_list_to_csv(global_distance_1, os.path.join(Algorithms7.chart_data_save_path, "chart_12_y1.csv"))
     Algorithms7.save_list_to_csv(global_distance_2, os.path.join(Algorithms7.chart_data_save_path, "chart_12_y2.csv"))
     Algorithms7.save_list_to_csv(global_cost_1, os.path.join(Algorithms7.chart_data_save_path, "chart_13_y1.csv"))
     Algorithms7.save_list_to_csv(global_cost_2, os.path.join(Algorithms7.chart_data_save_path, "chart_13_y2.csv"))
+
+    Algorithms7.save_list_to_csv(global_cost_1_all, os.path.join(Algorithms7.chart_data_save_path, "chart_14_y1.csv"))
+    Algorithms7.save_list_to_csv(global_cost_2_all, os.path.join(Algorithms7.chart_data_save_path, "chart_14_y2.csv"))
 

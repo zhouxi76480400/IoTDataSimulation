@@ -326,6 +326,7 @@ def get_all_min_global(list_global):
         list_ret.append(sum(a_list)/len(a_list))
     return list_ret
 
+
 def get_avg_from_list(double_list: list):
     avg: float = 0.
     if len(double_list) > 0:
@@ -335,6 +336,15 @@ def get_avg_from_list(double_list: list):
         tmp_float /= len(double_list)
         avg = tmp_float
     return avg
+
+
+def get_summary_from_list(double_list: list):
+    sum_ = 0
+    if len(double_list) > 0:
+        for a_a_value in double_list:
+            sum_ += a_a_value
+    return sum_
+
 
 def get_chart_1_data(day, hour_):
     #
